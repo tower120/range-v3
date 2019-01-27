@@ -213,7 +213,6 @@ namespace ranges
 #define RANGES_WORKAROUND_MSVC_701425 // Failure to deduce decltype(pointer-to-member) (gcc_bugs_bugs_bugs for MSVC)
 #endif
 
-#define RANGES_WORKAROUND_MSVC_125882 // Multiple defaulted copy constructors/assignment operators are not supported
 #define RANGES_WORKAROUND_MSVC_249830 // constexpr and arguments that aren't subject to lvalue-to-rvalue conversion
 #define RANGES_WORKAROUND_MSVC_620035 // Error when definition-context name binding finds only deleted function
 #define RANGES_WORKAROUND_MSVC_677925 // Bogus C2676 "binary '++': '_Ty' does not define this operator"
@@ -470,11 +469,17 @@ namespace ranges
 #endif
 #endif // RANGES_CXX_IF_CONSTEXPR
 
+// Its not enough for the compiler to support this; the stdlib must support it too.
 #ifndef RANGES_CXX_ALIGNED_NEW
-#ifdef __cpp_aligned_new
+#if (!defined(_LIBCPP_VERSION) || _LIBCPP_VERSION >= 4000) && \
+    (!defined(__GLIBCXX__) || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE >= 7))
+#if defined(__cpp_aligned_new)
 #define RANGES_CXX_ALIGNED_NEW __cpp_aligned_new
 #else
 #define RANGES_CXX_ALIGNED_NEW RANGES_CXX_FEATURE(ALIGNED_NEW)
+#endif
+#else // _LIBCPP_VERSION < 4000 || __GLIBCXX__ < 20170502
+#define RANGES_CXX_ALIGNED_NEW 0L
 #endif
 #endif // RANGES_CXX_ALIGNED_NEW
 

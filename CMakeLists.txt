@@ -23,6 +23,12 @@ target_include_directories(range-v3 INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_
 target_include_directories(range-v3 SYSTEM INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 target_link_libraries(range-v3 INTERFACE meta)
 
+function(rv3_add_test TESTNAME EXENAME FIRSTSOURCE)
+  add_executable(${EXENAME} ${FIRSTSOURCE} ${ARGN})
+  target_link_libraries(${EXENAME} range-v3)
+  add_test(${TESTNAME} ${EXENAME})
+endfunction(rv3_add_test)
+
 include(CTest) # invokes enable_testing() and defines BUILD_TESTING variable, defaulting to ON
 include(TestHeaders)
 include(ranges_options)
@@ -128,3 +134,5 @@ install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/range-v3-config-version.cmake
   DESTINATION lib/cmake/range-v3)
 install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+
+export(EXPORT range-v3-targets FILE range-v3-config.cmake)

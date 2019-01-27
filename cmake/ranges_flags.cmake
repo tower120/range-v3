@@ -21,8 +21,12 @@ message("[range-v3]: C++ std=${RANGES_CXX_STD}")
 if (RANGES_CXX_COMPILER_CLANGCL OR RANGES_CXX_COMPILER_MSVC)
   ranges_append_flag(RANGES_HAS_CXXSTDCOLON "-std:c++${RANGES_CXX_STD}")
   set(RANGES_STD_FLAG "-std:c++${RANGES_CXX_STD}")
-  # Enable MSVC strict mode
+  # Enable strict mode
   ranges_append_flag(RANGES_HAS_PERMISSIVEMINUS "-permissive-")
+  if (RANGES_CXX_COMPILER_CLANGCL)
+    ranges_append_flag(RANGES_HAS_FNO_MS_COMPATIBIILITY "-fno-ms-compatibility")
+    ranges_append_flag(RANGES_HAS_FNO_DELAYED_TEMPLATE_PARSING "-fno-delayed-template-parsing")
+  endif()
   # Enable "normal" warnings and make them errors:
   ranges_append_flag(RANGES_HAS_W3 -W3)
   ranges_append_flag(RANGES_HAS_WX -WX)
@@ -173,12 +177,18 @@ set(CMAKE_REQUIRED_FLAGS ${RANGES_STD_FLAG})
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/cmake/thread_test_code.cpp" RANGE_V3_PROBE_CODE)
 check_cxx_source_compiles("${RANGE_V3_PROBE_CODE}" RANGE_V3_THREAD_PROBE)
 unset(RANGE_V3_PROBE_CODE)
+if (NOT RANGE_V3_THREAD_PROBE)
+  add_compile_options("-DRANGES_CXX_THREAD=0")
+endif()
 
 # Probe for library and compiler support for aligned new
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/cmake/aligned_new_probe.cpp" RANGE_V3_PROBE_CODE)
 check_cxx_source_compiles("${RANGE_V3_PROBE_CODE}" RANGE_V3_ALIGNED_NEW_PROBE)
 unset(RANGE_V3_PROBE_CODE)
 unset(CMAKE_REQUIRED_FLAGS)
+if (NOT RANGE_V3_ALIGNED_NEW_PROBE)
+  add_compile_options("-DRANGES_CXX_ALIGNED_NEW=0")
+endif()
 
 # Probe for coroutine TS support
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/cmake/coro_test_code.cpp" RANGE_V3_PROBE_CODE)
@@ -197,6 +207,9 @@ elseif(RANGES_CXX_COMPILER_CLANG)
 endif()
 unset(CMAKE_REQUIRED_FLAGS)
 unset(RANGE_V3_PROBE_CODE)
+if (RANGE_V3_COROUTINE_FLAGS)
+  add_compile_options(${RANGE_V3_COROUTINE_FLAGS})
+endif()
 
 if (RANGES_VERBOSE_BUILD)
   message("[range-v3]: C++ flags: ${CMAKE_CXX_FLAGS}")
