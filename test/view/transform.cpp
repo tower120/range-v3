@@ -70,6 +70,9 @@ void test_size()
     std::cout << sizeof(t1.begin()) << std::endl;
     std::cout << sizeof(t2.begin()) << std::endl;
 
+    // Output is: 8 8 16
+
+
     /*static_assert(
         sizeof(vec.begin()) == sizeof(t1.begin()) &&
         sizeof(t1.begin())  == sizeof(t2.begin()) &&
