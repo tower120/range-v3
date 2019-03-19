@@ -76,17 +76,22 @@ namespace ranges
             // This means, that vec | transform(Fun{}) | transform(Fun{}) can not be optimised with EBO.
             template<class fun_ref_>
             struct adaptor_fun<true, fun_ref_>
+                : private box<semiregular_t<Fun>, adaptor_fun<true, fun_ref_>>
             {
             public:
                 using fun_t  = Fun;
 
                 fun_t fun_() const noexcept
                 {
-                    return Fun();
+                    return this->adaptor_fun::box::get();
+                    //return Fun();
                 }
 
                 adaptor_fun() = default;
-                adaptor_fun(fun_t&&) noexcept {}
+                //adaptor_fun(fun_t&&) noexcept {}
+                adaptor_fun(fun_t&& fun) noexcept
+                   : adaptor_fun::box(std::move(fun))
+                {}
             };
 
             template<class fun_ref_>
