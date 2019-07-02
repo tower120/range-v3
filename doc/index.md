@@ -126,21 +126,8 @@ vector with it:
 
 ### Range adaptor object
 
-`view::remove_if(fn)`, `view::transform(fn)`, etc. are functions that return [range adaptor object](http://eel.is/c++draft/range.adaptor.object)s. Range adaptor object is unary function (with range as argument), which returns range.
-
-Range adaptor object store all passed arguments by copy/move (similar to `std::bind`). In order to pass argument by reference, you have to wrap it with `std::reference_wrapper` :
-
-~~~~~~~{.cpp}
-    std::vector<std::string> vi{"One", "Two", "Apple", "Three", "Apple"};
-    const std::string str = "Apple";
-    
-    using namespace ranges;
-    auto rng1 = vi | view::remove(std::ref(str));
-    auto rng2 = view::remove(vi, std::ref(str));
-~~~~~~~
-
-The same is true for direct view calls. View may need to store your value (like `view::remove` does). If you want to store just reference, use `std::reference_wrapper`. 
-  
+`view::unique`, `view::remove_if(fn)`, `view::transform(fn)`, etc. are [range adaptor object](http://eel.is/c++draft/range.adaptor.object)s. 
+Range adaptor object is unary function (with range as argument), which returns range. Range adaptor object store all passed arguments by copy/move (similar to `std::bind`).  
 
 ### View constness
 
@@ -188,6 +175,30 @@ Same as above, but with function-call syntax instead of pipe syntax:
 ~~~~~~~{.cpp}
     action::unique(action::sort(vi));
 ~~~~~~~
+
+### Passing values by references 
+
+Some views may accept values as arguments. They may be copied inside views. Values may be wrapped in `std::reference_wrapper`:
+
+~~~~~~~{.cpp}
+    std::vector<std::string> vi{"One", "Two", "Apple", "Three", "Apple"};
+    const std::string str = "Apple";
+    
+    using namespace ranges;
+    auto rng1 = vi | view::remove(std::ref(str));
+    auto rng2 = view::remove(vi, std::ref(str));
+~~~~~~~
+
+Actions also may accept values. Since actions applied immediately, they don't copy values inside.
+But action adaptor objects do! You can wrap them in `std::ref` too:
+
+~~~~~~~{.cpp}
+    vi |= action::remove(std::ref(str));
+    action::remove(vi, str);     // you don't need std::ref here
+~~~~~~~
+
+Remember, that value wrapped in `std::reference_wrapper` must outlive view.
+
 
 ## Create Custom Ranges
 
