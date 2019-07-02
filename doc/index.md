@@ -124,6 +124,24 @@ vector with it:
     // vi == {1,2,2,3,3,3,4,4,4,4,5,5,5,5,5,...}
 ~~~~~~~
 
+### Range adaptor object
+
+`view::remove_if(fn)`, `view::transform(fn)`, etc. are functions that return [range adaptor object](http://eel.is/c++draft/range.adaptor.object)s. Range adaptor object is unary function (with range as argument), which returns range.
+
+Range adaptor object store all passed arguments by copy/move (similar to `std::bind`). In order to pass argument by reference, you have to wrap it with `std::reference_wrapper` :
+
+~~~~~~~{.cpp}
+    std::vector<std::string> vi{"One", "Two", "Apple", "Three", "Apple"};
+    const std::string str = "Apple";
+    
+    using namespace ranges;
+    auto rng1 = vi | view::remove(std::ref(str));
+    auto rng2 = view::remove(vi, std::ref(str));
+~~~~~~~
+
+The same is true for direct view calls. View may need to store your value (like `view::remove` does). If you want to store just reference, use `std::reference_wrapper`. 
+  
+
 ### View constness
 
 Logically, a view is like a pair of iterators. In order to work, and work fast, many views need to cache some data.
